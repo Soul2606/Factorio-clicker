@@ -375,7 +375,7 @@ function drone_swarm(delta_time){
     drone_task_amount = Math.min((damage / drone_repair_speed) * drone_satisfaction, drone_idle)
     drone_idle -= drone_task_amount
     repair(drone_task_amount * drone_repair_speed * delta_time)
-    drone.amount -= drone_task_amount * 0.1 * delta_time
+    drone.amount -= Math.min((drone_task_amount * 0.1 * delta_time), (enemies * 0.5))
 
     while((defense.broken + solar_panel.broken + assembler.broken + miner.broken) > 0 && drone_idle > 0){
         let rebuilt = rebuild()
