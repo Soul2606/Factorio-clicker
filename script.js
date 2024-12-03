@@ -64,13 +64,13 @@ class Drone_network {
 
 const solar_panel =   new Building('Solar panel', 1, 60, 0, 40, 100, 0, 0, 1)
 const miner =         new Building('Miner', 1, 20, 0, -2, 100, 0, 2, 2)
-const assembler =     new Building('Assembler', 200, 15, 0, -1, 150, 0, 1, 1)
+const assembler =     new Building('Assembler', 0, 15, 0, -1, 150, 0, 1, 1)
 const defense =       new Defense('Defense', 0, 100, 0, 0, 500, 0, 0, 2, 1, 25)
 const drone =         new Drone_network(0, 0, 3, 25, 1, 10)
 const each_buildings = [solar_panel, miner, assembler, defense] // drone are not buildings
 
 let ore = 0
-let material = 15000000
+let material = 15
 let ammunition = 0
 let powergrid_satisfaction = 0
 let pollution = 0
@@ -80,7 +80,6 @@ let damage = 0
 let assembler_met_priority = 0
 let assembler_ammo_priority = 0
 let assembler_drone_priority = 0
-let drone_idle_percent = 0
 let drone_build_material_debt = 0
 let drone_build_progress = 0
 
@@ -117,6 +116,11 @@ function random_with_probability(outcomes, weights){
 }
 
 
+function relu(value){
+    return Math.max(0, value)
+}
+
+
 function update_display(){
     d_ore.textContent = "Ore:" + simplify(ore)
     d_material.textContent = "Material:" + simplify(material)
@@ -132,7 +136,7 @@ function update_display(){
     d_damage.textContent = "Damage:" + simplify(damage)
     d_lost_buildings.textContent = "Lost buildings:" + simplify(defense.broken + solar_panel.broken + assembler.broken + miner.broken)
     d_drones_amount.textContent = "Amount:" + simplify(drone.amount)
-    d_drones_idle_percent.textContent = "Idle:" + Math.floor(drone_idle_percent * 100) + "%"
+    d_drones_idle_percent.textContent = "Idle:" + Math.floor(100 - drone.working / drone.amount * 100) + "%"
     if(unlock_military){
         for(let i = 0; i < d_military.length; i++) {
             d_military[i].style.display = ""
@@ -404,53 +408,76 @@ function enemy_damage(delta_time){
 
 
 function drone_swarm(delta_time){
-    let drone_idle = drone.amount
-    let drone_satisfaction = clamp((material / drone.amount), 0, 1) * powergrid_satisfaction
+    
+    //All available tasks for drones to do
+    const task_repair = damage
+    const task_reconstruct = each_buildings.map(building=>building.broken)
+    const task_construct = each_buildings.map(building=>building.scheduled_for_construction)
 
-    let drone_task_amount = 0 // This variable is used to assign how many drones will do a certain task. It's reset and used multiple times
-    drone_task_amount = Math.min((damage / drone_repair_speed) * drone_satisfaction, drone_idle)
-    drone_idle -= drone_task_amount
-    repair(drone_task_amount * drone_repair_speed * delta_time)
-    drone.amount -= Math.min((drone_task_amount * 0.1 * delta_time), (enemies * 0.5))
 
-    while((defense.broken + solar_panel.broken + assembler.broken + miner.broken) > 0 && drone_idle > 0){
-        let rebuilt = rebuild()
-        if(rebuilt.health * drone_satisfaction < drone_idle){drone_idle = 0; break}
-        drone_idle -= rebuilt.health * drone_satisfaction
+    const tasks_total = task_repair + sum_of_array(task_reconstruct) + sum_of_array(task_construct)
+
+    if(tasks_total === 0){
+        return
     }
 
-    // Code for drones to build for you with build speed depending on how many drones you have
-    each_buildings.forEach(element => {
-        drone_build_progress += clamp(drone_idle * delta_time, 0, element.scheduled_for_construction)
-        drone_idle -= clamp(drone_idle, 0, element.scheduled_for_construction)
+    const drone_per_task = drone.amount / tasks_total
 
-        let material_satisfaction = clamp(material / (element.scheduled_for_construction * element.cost), 0, 1)
-        material_satisfaction = isNaN(material_satisfaction) ? 0 : material_satisfaction;
-        
-        let work_capacity = Math.floor(drone_build_progress * material_satisfaction)
-        
-        if(work_capacity < element.scheduled_for_construction){
-            element.scheduled_for_construction -= work_capacity
-            material -= work_capacity * element.cost
-            element.amount += work_capacity
-            drone_build_progress -= work_capacity
-        }else{
-            drone_build_progress -= element.scheduled_for_construction
-            material -= element.scheduled_for_construction * element.cost
-            element.amount += element.scheduled_for_construction
-            element.scheduled_for_construction = 0
-        }
+    const task_repair_factor = task_repair / tasks_total
+    const task_reconstruct_factor = task_reconstruct.map(amount=>amount / tasks_total)
+    const task_construct_factor = task_construct.map(amount=>amount / tasks_total)
 
-    });
+
+    //All tasks that are possible to do with the current workforce
+    let task_repair_scheduled
+    let task_reconstruct_scheduled
+    let task_construct_scheduled
+
+    if (drone_per_task >= 1 || isNaN(drone_per_task)) {
+        task_repair_scheduled = task_repair
+        task_reconstruct_scheduled = task_reconstruct
+        task_construct_scheduled = task_construct
+
+        drone.working = tasks_total
+    }else{
+        task_repair_scheduled = task_repair_factor * drone.amount
+        task_reconstruct_scheduled = task_reconstruct_factor.map(amount=>amount * drone.amount)
+        task_construct_scheduled = task_construct_factor.map(amount=>amount * drone.amount)
+
+        drone.working = drone.amount
+    }
+
+
+    //Actually doing the tasks
+    //Repair
+    damage -= task_repair_scheduled * drone.work_speed
+    //Reconstruct
+    each_buildings.forEach((building, i)=>{
+        const work_done = relu(building.broken - task_reconstruct_scheduled[i] * drone.work_speed)
+        building.broken -= work_done
+        building.amount += work_done
+    })
+    //Construct
+    each_buildings.forEach((building, i)=>{
+        const work_done = task_construct_scheduled[i] * drone.work_speed
+        building.scheduled_for_construction -= work_done
+        building.amount += work_done
+    })
+
+
+    //Debug/warnings
+    if (isNaN(damage)||task_construct_scheduled.filter(e=>isNaN(e))) {
+        console.warn('Detected NaN')
+    }
+
+
     calculate_drone_build_material_debt()
-    drone_idle_percent = drone_idle / drone.amount
 }
 
 
 function add_drone_construction_task(building, amount){
     if(building.cost * amount > material - drone_build_material_debt){return}
     building.scheduled_for_construction += amount
-    console.log(" | " + [solar_panel.scheduled_for_construction, miner.scheduled_for_construction, assembler.scheduled_for_construction, defense.scheduled_for_construction])
     calculate_drone_build_material_debt()
 }
 
