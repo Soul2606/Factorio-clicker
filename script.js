@@ -24,17 +24,54 @@ const d_drones = document.getElementsByClassName("d_drones")
 const d_drones_amount = document.getElementById("d_drones_amount")
 const d_drones_idle_percent = document.getElementById("d_drones_idle_percent")
 
-let solar_panel =   {amount: 1, health: 100,    cost: 60,   build_task: 0   ,power: 40,      broken: 0}
-let miner =         {amount: 1, health: 100,    cost: 20,   build_task: 0,  speed: 1.846,   power: -2,  pollution: 2,   broken: 0}
-let assembler =     {amount: 0, health: 150,    cost: 15,   build_task: 0,  speed: 1,       power: -1,  pollution: 1,   broken: 0}
-let defense =       {amount: 0, health: 500,    cost: 100,  build_task: 0,  strength: 2,    broken: 0}
-let drone =         {amount: 0, health: 25,     cost:10,    speed: 1,       power: -3}
+
+class Building {
+    constructor(name, amount, cost, scheduled_for_construction, power_production, health, broken, pollution, speed) {
+        this.name = name
+        this.amount = amount
+        this.cost = cost
+        this.scheduled_for_construction = scheduled_for_construction
+        this.power_production = power_production
+        this.health = health
+        this.broken = broken
+        this.pollution = pollution
+        this.speed = speed
+    }
+}
+
+class Defense extends Building {
+    constructor(name, amount, cost, scheduled_for_construction, power_production, health, broken, pollution, strength, ammunition_usage, building_coverage) {
+        super(name, amount, cost, scheduled_for_construction, power_production, health, broken, pollution)
+        this.strength = strength
+        this.ammunition_usage = ammunition_usage
+        this.building_coverage = building_coverage
+    }
+}
+
+class Drone_network {
+    constructor(amount, working, power_consumption, health, work_speed, cost) {
+        //amount and working is for all drones
+        this.amount = amount
+        this.working = working
+        //These below are for each individual drone
+        this.power_consumption = power_consumption
+        this.health = health
+        this.work_speed = work_speed
+        this.cost = cost
+    }
+}
+
+
+const solar_panel =   new Building('Solar panel', 1, 60, 0, 40, 100, 0, 0, 1)
+const miner =         new Building('Miner', 1, 20, 0, -2, 100, 0, 2, 2)
+const assembler =     new Building('Assembler', 200, 15, 0, -1, 150, 0, 1, 1)
+const defense =       new Defense('Defense', 0, 100, 0, 0, 500, 0, 0, 2, 1, 25)
+const drone =         new Drone_network(0, 0, 3, 25, 1, 10)
 const each_buildings = [solar_panel, miner, assembler, defense] // drone are not buildings
 
 let ore = 0
-let material = 15
+let material = 15000000
 let ammunition = 0
-let power = 0
 let powergrid_satisfaction = 0
 let pollution = 0
 let coverage = 0
@@ -83,7 +120,7 @@ function random_with_probability(outcomes, weights){
 function update_display(){
     d_ore.textContent = "Ore:" + simplify(ore)
     d_material.textContent = "Material:" + simplify(material)
-    d_power.textContent = "Power:" + simplify(power)
+    d_power.textContent = "Power:" + simplify(solar_panel.power_production * solar_panel.amount)
     d_power_satisfaction.textContent = "Satisfaction:" + powergrid_satisfaction.toFixed(2)
     d_miner_amount.textContent = "Amount:" + simplify(miner.amount)
     d_assembler_amount.textContent = "Amount:" + simplify(assembler.amount)
@@ -264,8 +301,7 @@ function assembler_priority(){
 
 
 function powergrid(){
-    power = solar_panel.amount * solar_panel.power + miner.amount * miner.power + assembler.amount * assembler.power + drone.amount * drone.power
-    powergrid_satisfaction = solar_panel.amount * solar_panel.power / Math.abs(miner.amount * miner.power + assembler.amount * assembler.power + drone.amount * drone.power)
+    powergrid_satisfaction = solar_panel.amount * solar_panel.power_production / Math.abs(miner.amount * miner.power_production + assembler.amount * assembler.power_production + drone.working * drone.power_consumption)
     powergrid_satisfaction = isNaN(powergrid_satisfaction) ? 0 : powergrid_satisfaction;
     powergrid_satisfaction = clamp(powergrid_satisfaction, 0, 1)
 }
@@ -385,24 +421,24 @@ function drone_swarm(delta_time){
 
     // Code for drones to build for you with build speed depending on how many drones you have
     each_buildings.forEach(element => {
-        drone_build_progress += clamp(drone_idle * delta_time, 0, element.build_task)
-        drone_idle -= clamp(drone_idle, 0, element.build_task)
+        drone_build_progress += clamp(drone_idle * delta_time, 0, element.scheduled_for_construction)
+        drone_idle -= clamp(drone_idle, 0, element.scheduled_for_construction)
 
-        let material_satisfaction = clamp(material / (element.build_task * element.cost), 0, 1)
+        let material_satisfaction = clamp(material / (element.scheduled_for_construction * element.cost), 0, 1)
         material_satisfaction = isNaN(material_satisfaction) ? 0 : material_satisfaction;
         
         let work_capacity = Math.floor(drone_build_progress * material_satisfaction)
         
-        if(work_capacity < element.build_task){
-            element.build_task -= work_capacity
+        if(work_capacity < element.scheduled_for_construction){
+            element.scheduled_for_construction -= work_capacity
             material -= work_capacity * element.cost
             element.amount += work_capacity
             drone_build_progress -= work_capacity
         }else{
-            drone_build_progress -= element.build_task
-            material -= element.build_task * element.cost
-            element.amount += element.build_task
-            element.build_task = 0
+            drone_build_progress -= element.scheduled_for_construction
+            material -= element.scheduled_for_construction * element.cost
+            element.amount += element.scheduled_for_construction
+            element.scheduled_for_construction = 0
         }
 
     });
@@ -413,8 +449,8 @@ function drone_swarm(delta_time){
 
 function add_drone_construction_task(building, amount){
     if(building.cost * amount > material - drone_build_material_debt){return}
-    building.build_task += amount
-    console.log(" | " + [solar_panel.build_task, miner.build_task, assembler.build_task, defense.build_task])
+    building.scheduled_for_construction += amount
+    console.log(" | " + [solar_panel.scheduled_for_construction, miner.scheduled_for_construction, assembler.scheduled_for_construction, defense.scheduled_for_construction])
     calculate_drone_build_material_debt()
 }
 
@@ -423,7 +459,7 @@ function calculate_drone_build_material_debt(){
     //Drone material debt is made to prevent you from ordering your drones to construct more than you can afford
     drone_build_material_debt = 0
     each_buildings.forEach(element => {
-        drone_build_material_debt += element.build_task * element.cost
+        drone_build_material_debt += element.scheduled_for_construction * element.cost
     });
 }
 
@@ -460,5 +496,4 @@ function main(){
     if(assembler.amount >= 200){unlock_drones = true}
     
     update_display()
-    console.log(solar_panel.amount+" "+solar_panel.power+" "+miner.amount+" "+miner.power+" "+assembler.amount+" "+assembler.power+" "+drone.amount+" "+drone.power)
 }// main
