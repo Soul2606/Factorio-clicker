@@ -466,8 +466,8 @@ function drone_swarm(delta_time){
 
 
     //Debug/warnings
-    if (isNaN(damage)||task_construct_scheduled.filter(e=>isNaN(e))) {
-        console.warn('Detected NaN')
+    if (isNaN(damage)||task_construct_scheduled.filter(e=>isNaN(e))||task_reconstruct_scheduled.filter(e=>isNaN(e))) {
+        console.warn('Detected NaN', 'task_construct', task_construct, 'task_construct_factor', task_construct_factor, 'task_construct_scheduled', task_construct_scheduled, 'task_reconstruct', task_reconstruct, 'task_reconstruct_factor', task_reconstruct_factor, 'task_reconstruct_scheduled', task_reconstruct_scheduled, 'task_repair', task_repair, 'task_repair_factor', task_repair_factor, 'task_repair_scheduled', task_repair_scheduled, 'tasks_total', tasks_total, 'damage', damage, 'drone.amount', drone.amount, 'drone.working', drone.working)
     }
 
 
