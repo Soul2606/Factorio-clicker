@@ -49,6 +49,13 @@
 				<label>Drones</label>
 				<input type="range" id="d_assembler_priority_drones" value="0" min="0" max="100">
 			</div>
+			<div class="d_military d_drones">
+				<div class="diagram">
+					<div id="diagram-material" style="background-color: lightsteelblue; height: 100%;"></div>
+					<div id="diagram-ammunition" style="background-color: lightcoral; height: 100%;"></div>
+					<div id="diagram-drones" style="background-color: lightgreen; height: 100%;"></div>
+				</div>
+			</div>
 			<br>
 			<h4>Power</h4>
 			<div class="flex_container">
@@ -62,6 +69,7 @@
 			<p>Cost:60</p>
 			<p id="d_solar_panels_amount">error</p>
 			<p id="d_power">error</p>
+			<p id="d_power_consumption">error</p>
 			<p id="d_power_satisfaction">error</p>
 		</div>
 		
@@ -96,8 +104,27 @@
 			<h4>Drone swarm</h4>
 			<p id="d_drones_amount">error</p>
 			<p id="d_drones_idle_percent">error</p>
+			<h5>Tasks</h5>
+			<div class="drones-task-list">
+				<div class="drones-task-list-item" id="drones-task-repair">
+					<div class="drones-task-list-item-division" id="drones-task-repair-working"></div>
+					<div class="drones-task-list-item-division" id="drones-task-repair-queued"></div>
+				</div>
+				<div class="drones-task-list-item" id="drones-task-reconstruct">
+					<div class="drones-task-list-item-division" id="drones-task-reconstruct-working"></div>
+					<div class="drones-task-list-item-division" id="drones-task-reconstruct-queued"></div>
+				</div>
+				<div class="drones-task-list-item" id="drones-task-construct">
+					<div class="drones-task-list-item-division" id="drones-task-construct-working"></div>
+					<div class="drones-task-list-item-division" id="drones-task-construct-queued"></div>
+				</div>
+			</div>
 		</div>
 		
+	</div>
+	<div class="cheats" id="cheats">
+		<button id="get-material-button">Get material</button>
+		<button id="unlock-all-button">Unlock all</button>
 	</div>
 </body>
 </html>

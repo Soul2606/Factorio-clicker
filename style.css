@@ -20,3 +20,37 @@ body{
    border: solid gray;
    border-width: 2px 0 0 0;
 }
+
+.cheats{
+   margin: 50px 5px;
+   padding: 25px 0;
+   border-top: solid black 1px;
+}
+
+.diagram{
+   height: 30px; 
+   width: 100%;
+   border: solid black 1px;
+   display: flex;
+}
+
+.drones-task-list{
+   border: solid black 1px;
+   width: auto;
+   height: 200px;
+   background-color: beige;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-around;
+}
+
+.drones-task-list-item{
+   width: 100%;
+   height: 25px;
+   display: flex;
+}
+
+.drones-task-list-item-division{
+   height: 100%;
+   border: solid black 1px;
+}

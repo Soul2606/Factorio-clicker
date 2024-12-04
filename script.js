@@ -9,6 +9,7 @@ const d_miner_amount = document.getElementById("d_miner_amount")
 const d_ore = document.getElementById("d_ore")
 const d_material = document.getElementById("d_material")
 const d_power = document.getElementById("d_power")
+const d_power_consumption = document.getElementById("d_power_consumption")
 const d_power_satisfaction = document.getElementById("d_power_satisfaction")
 const d_assembler_amount = document.getElementById("d_assembler_amount")
 const d_solar_panels_amount = document.getElementById("d_solar_panels_amount")
@@ -23,6 +24,7 @@ const d_lost_buildings = document.getElementById("d_lost_buildings")
 const d_drones = document.getElementsByClassName("d_drones")
 const d_drones_amount = document.getElementById("d_drones_amount")
 const d_drones_idle_percent = document.getElementById("d_drones_idle_percent")
+const d_get_material_button = document.getElementById('get-material-button')
 
 
 class Building {
@@ -66,7 +68,7 @@ const solar_panel =   new Building('Solar panel', 1, 60, 0, 40, 100, 0, 0, 1)
 const miner =         new Building('Miner', 1, 20, 0, -2, 100, 0, 2, 2)
 const assembler =     new Building('Assembler', 0, 15, 0, -1, 150, 0, 1, 1)
 const defense =       new Defense('Defense', 0, 100, 0, 0, 500, 0, 0, 2, 1, 25)
-const drone =         new Drone_network(0, 0, 3, 25, 1, 10)
+const drone =         new Drone_network(0, 0, 3, 25, 0.01, 10)
 const each_buildings = [solar_panel, miner, assembler, defense] // drone are not buildings
 
 let ore = 0
@@ -124,7 +126,10 @@ function relu(value){
 function update_display(){
     d_ore.textContent = "Ore:" + simplify(ore)
     d_material.textContent = "Material:" + simplify(material)
-    d_power.textContent = "Power:" + simplify(solar_panel.power_production * solar_panel.amount)
+    d_power.textContent = "Power production:" + simplify(solar_panel.power_production * solar_panel.amount)
+    d_power_consumption.textContent = 'Power consumption:' + simplify(sum_of_array(each_buildings.map(building=>{
+        return building.name === 'Solar panel'? 0: -building.power_production * building.amount
+    })) + drone.working * drone.power_consumption)
     d_power_satisfaction.textContent = "Satisfaction:" + powergrid_satisfaction.toFixed(2)
     d_miner_amount.textContent = "Amount:" + simplify(miner.amount)
     d_assembler_amount.textContent = "Amount:" + simplify(assembler.amount)
@@ -137,6 +142,9 @@ function update_display(){
     d_lost_buildings.textContent = "Lost buildings:" + simplify(defense.broken + solar_panel.broken + assembler.broken + miner.broken)
     d_drones_amount.textContent = "Amount:" + simplify(drone.amount)
     d_drones_idle_percent.textContent = "Idle:" + Math.floor(100 - drone.working / drone.amount * 100) + "%"
+    document.getElementById('diagram-material').style.width = assembler_met_priority * 100 + '%'
+    document.getElementById('diagram-ammunition').style.width = assembler_ammo_priority * 100 + '%'
+    document.getElementById('diagram-drones').style.width = assembler_drone_priority * 100 + '%'
     if(unlock_military){
         for(let i = 0; i < d_military.length; i++) {
             d_military[i].style.display = ""
@@ -466,12 +474,25 @@ function drone_swarm(delta_time){
 
 
     //Debug/warnings
-    if (isNaN(damage)||task_construct_scheduled.filter(e=>isNaN(e))||task_reconstruct_scheduled.filter(e=>isNaN(e))) {
+    if (isNaN(damage)||task_construct_scheduled.some(e=>isNaN(e))||task_reconstruct_scheduled.some(e=>isNaN(e))) {
         console.warn('Detected NaN', 'task_construct', task_construct, 'task_construct_factor', task_construct_factor, 'task_construct_scheduled', task_construct_scheduled, 'task_reconstruct', task_reconstruct, 'task_reconstruct_factor', task_reconstruct_factor, 'task_reconstruct_scheduled', task_reconstruct_scheduled, 'task_repair', task_repair, 'task_repair_factor', task_repair_factor, 'task_repair_scheduled', task_repair_scheduled, 'tasks_total', tasks_total, 'damage', damage, 'drone.amount', drone.amount, 'drone.working', drone.working)
     }
 
 
     calculate_drone_build_material_debt()
+
+
+    //Display and visualize data
+
+    document.getElementById('drones-task-repair-working').style.width = task_repair_scheduled / drone.amount * 100 + '%'
+    document.getElementById('drones-task-repair-queued').style.width = task_repair_factor - task_repair_scheduled / drone.amount * 100 + '%'
+    
+    document.getElementById('drones-task-reconstruct-working').style.width = task_reconstruct_scheduled / drone.amount * 100 + '%'
+    document.getElementById('drones-task-reconstruct-queued').style.width = task_reconstruct_factor - task_reconstruct_scheduled / drone.amount * 100 + '%'
+
+    document.getElementById('drones-task-construct-working').style.width = task_construct_scheduled / drone.amount * 100 + '%'
+    document.getElementById('drones-task-construct-queued').style.width = task_construct_factor - task_construct_scheduled / drone.amount * 100 + '%'
+
 }
 
 
@@ -489,6 +510,18 @@ function calculate_drone_build_material_debt(){
         drone_build_material_debt += element.scheduled_for_construction * element.cost
     });
 }
+
+
+d_get_material_button.addEventListener('click', ()=>{
+    material += 10000
+})
+
+
+document.getElementById('unlock-all-button').addEventListener('click', ()=>{
+    unlock_drones = true
+    unlock_military = true
+    unlock_repair = true
+})
 
 
 bt = Date.now()
