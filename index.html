@@ -2,102 +2,102 @@
 
 <!DOCTYPE html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="script.js" defer></script>
 </head>
 <body>
-<div class="flex_container">
-
-<div class="flex_element">
-    <h4>Resources</h4>
-    <p id="d_ore">error</p>
-    <p id="d_material">error</p>
-    <br>
-    <h4>Production</h4>
-    <div class="flex_container">
-        <button onclick="build_miner(1)">Miner</button>
-        <div class="d_drones">
-            <button onclick="add_drone_construction_task(miner, 10)">+10</button>
-            <button onclick="add_drone_construction_task(miner, 100)">+100</button>
-            <button onclick="add_drone_construction_task(miner, 1000)">+1k</button>
-        </div>
-    </div>
-    <p>Cost:20</p>
-    <p id="d_miner_amount">error</p>
-    <div class="flex_container">
-        <button onclick="build_assembler(1)">Assembler</button>
-        <div class="d_drones">
-            <button onclick="add_drone_construction_task(assembler, 10)">+10</button>
-            <button onclick="add_drone_construction_task(assembler, 100)">+100</button>
-            <button onclick="add_drone_construction_task(assembler, 1000)">+1k</button>
-        </div>
-    </div>
-    <p>Cost:15</p>
-    <p id="d_assembler_amount">error</p>
-    <div class="d_military">
-    <label>Material</label>
-    <input type="range" id="d_assembler_priority_material" value="100" min="1" max="100">
-    <br>
-    <label>Ammunition</label>
-    <input type="range" id="d_assembler_priority_ammunition" value="0" min="0" max="100">
-    </div>
-    <div class="d_drones">
-    <label>Drones</label>
-    <input type="range" id="d_assembler_priority_drones" value="0" min="0" max="100">
-    </div>
-    <br>
-    <h4>Power</h4>
-    <div class="flex_container">
-        <button onclick="build_solar_panel(1)">Solar panel</button>
-        <div class="d_drones">
-            <button onclick="add_drone_construction_task(solar_panel, 10)">+10</button>
-            <button onclick="add_drone_construction_task(solar_panel, 100)">+100</button>
-            <button onclick="add_drone_construction_task(solar_panel, 1000)">+1k</button>
-        </div>
-    </div>
-    <p>Cost:60</p>
-    <p id="d_solar_panels_amount">error</p>
-    <p id="d_power">error</p>
-    <p id="d_power_satisfaction">error</p>
-</div>
-    
-<div class="flex_element d_military">
-    <div>
-    <h4>Military</h4>
-    <p id="d_ammunition">error</p>
-    <p id="d_coverage">error</p>
-    <div class="flex_container">
-        <button onclick="build_defenses(1)">Defenses</button>
-        <div class="d_drones">
-            <button onclick="add_drone_construction_task(defense, 10)">+10</button>
-            <button onclick="add_drone_construction_task(defense, 100)">+100</button>
-            <button onclick="add_drone_construction_task(defense, 1000)">+1k</button>
-        </div>
-    </div>
-    <p>Cost:100</p>
-    <p id="d_defense_amount">error</p>
-    <br>
-    <p id="d_enemies">error</p>
-</div>
-<div class="list_element" id="d_repair">
-    <h4>Repairs</h4>
-    <p id="d_damage">error</p>
-    <button onclick="repair(15)">Repair</button>
-    <p id="d_lost_buildings">Lost buildings</p>
-    <button onclick="rebuild()">Rebuild</button>
-    </div>
-</div>
-
-<div class="flex_element d_drones">
-    <h4>Drone swarm</h4>
-    <p id="d_drones_amount">error</p>
-    <p id="d_drones_idle_percent">error</p>
-</div>
-
-</div>
+	<div class="flex_container">
+		
+		<div class="flex_element">
+			<h4>Resources</h4>
+			<p id="d_ore">error</p>
+			<p id="d_material">error</p>
+			<br>
+			<h4>Production</h4>
+			<div class="flex_container">
+				<button onclick="build_miner(1)">Miner</button>
+				<div class="d_drones">
+					<button onclick="add_drone_construction_task(miner, 10)">+10</button>
+					<button onclick="add_drone_construction_task(miner, 100)">+100</button>
+					<button onclick="add_drone_construction_task(miner, 1000)">+1k</button>
+				</div>
+			</div>
+			<p>Cost:20</p>
+			<p id="d_miner_amount">error</p>
+			<div class="flex_container">
+				<button onclick="build_assembler(1)">Assembler</button>
+				<div class="d_drones">
+					<button onclick="add_drone_construction_task(assembler, 10)">+10</button>
+					<button onclick="add_drone_construction_task(assembler, 100)">+100</button>
+					<button onclick="add_drone_construction_task(assembler, 1000)">+1k</button>
+				</div>
+			</div>
+			<p>Cost:15</p>
+			<p id="d_assembler_amount">error</p>
+			<div class="d_military">
+				<label>Material</label>
+				<input type="range" id="d_assembler_priority_material" value="100" min="1" max="100">
+				<br>
+				<label>Ammunition</label>
+				<input type="range" id="d_assembler_priority_ammunition" value="0" min="0" max="100">
+			</div>
+			<div class="d_drones">
+				<label>Drones</label>
+				<input type="range" id="d_assembler_priority_drones" value="0" min="0" max="100">
+			</div>
+			<br>
+			<h4>Power</h4>
+			<div class="flex_container">
+				<button onclick="build_solar_panel(1)">Solar panel</button>
+				<div class="d_drones">
+					<button onclick="add_drone_construction_task(solar_panel, 10)">+10</button>
+					<button onclick="add_drone_construction_task(solar_panel, 100)">+100</button>
+					<button onclick="add_drone_construction_task(solar_panel, 1000)">+1k</button>
+				</div>
+			</div>
+			<p>Cost:60</p>
+			<p id="d_solar_panels_amount">error</p>
+			<p id="d_power">error</p>
+			<p id="d_power_satisfaction">error</p>
+		</div>
+		
+		<div class="flex_element d_military">
+			<div>
+				<h4>Military</h4>
+				<p id="d_ammunition">error</p>
+				<p id="d_coverage">error</p>
+				<div class="flex_container">
+					<button onclick="build_defenses(1)">Defenses</button>
+					<div class="d_drones">
+						<button onclick="add_drone_construction_task(defense, 10)">+10</button>
+						<button onclick="add_drone_construction_task(defense, 100)">+100</button>
+						<button onclick="add_drone_construction_task(defense, 1000)">+1k</button>
+					</div>
+				</div>
+				<p>Cost:100</p>
+				<p id="d_defense_amount">error</p>
+				<br>
+				<p id="d_enemies">error</p>
+			</div>
+			<div class="list_element" id="d_repair">
+				<h4>Repairs</h4>
+				<p id="d_damage">error</p>
+				<button onclick="repair(15)">Repair</button>
+				<p id="d_lost_buildings">Lost buildings</p>
+				<button onclick="rebuild()">Rebuild</button>
+			</div>
+		</div>
+		
+		<div class="flex_element d_drones">
+			<h4>Drone swarm</h4>
+			<p id="d_drones_amount">error</p>
+			<p id="d_drones_idle_percent">error</p>
+		</div>
+		
+	</div>
 </body>
 </html>
